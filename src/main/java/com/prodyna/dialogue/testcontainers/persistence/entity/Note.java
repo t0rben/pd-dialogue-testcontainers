@@ -7,11 +7,12 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
 @Document
-public class Note implements Persistable<String> {
+public class Note implements Persistable<String>, Serializable {
 
     @Id
     private String id;
@@ -39,9 +40,19 @@ public class Note implements Persistable<String> {
         return id == null;
     }
 
+    public void setId(String id) {
+
+        this.id = id;
+    }
+
     public String getContent() {
 
         return content;
+    }
+
+    public void setContent(String content) {
+
+        this.content = content;
     }
 
     public Long getVersion() {
@@ -49,9 +60,19 @@ public class Note implements Persistable<String> {
         return version;
     }
 
+    public void setVersion(Long version) {
+
+        this.version = version;
+    }
+
     public Date getCreatedDate() {
 
         return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+
+        this.createdDate = createdDate;
     }
 
     public Date getLastModifiedDate() {
@@ -59,9 +80,9 @@ public class Note implements Persistable<String> {
         return lastModifiedDate;
     }
 
-    public void setContent(String content) {
+    public void setLastModifiedDate(Date lastModifiedDate) {
 
-        this.content = content;
+        this.lastModifiedDate = lastModifiedDate;
     }
 
     @Override
@@ -94,4 +115,5 @@ public class Note implements Persistable<String> {
                 ", lastModifiedDate=" + lastModifiedDate +
                 '}';
     }
+
 }

@@ -7,3 +7,5 @@ spring:
     mongodb:
       database: testcontainers
       uri: mongodb://127.0.0.1:27017
+  cache:
+    type: SIMPLE
