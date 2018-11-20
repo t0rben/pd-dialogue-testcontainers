@@ -29,7 +29,7 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
-    @CachePut(value = "notes", key = "#note.id")
+    @CachePut(value = "notes", key = "#result.id")
     public Note updateNote(Note note) {
 
         return noteRepository.save(note);

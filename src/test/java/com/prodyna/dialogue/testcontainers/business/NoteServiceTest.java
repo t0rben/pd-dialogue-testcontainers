@@ -1,5 +1,6 @@
 package com.prodyna.dialogue.testcontainers.business;
 
+import com.prodyna.dialogue.testcontainers.AbstractDependencies;
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
 import com.prodyna.dialogue.testcontainers.persistence.repository.NoteRepository;
 import org.junit.Assert;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @MockBean(classes = NoteRepository.class)
-public class NoteServiceTest {
+public class NoteServiceTest extends AbstractDependencies {
 
     @Autowired
     private NoteService noteService;

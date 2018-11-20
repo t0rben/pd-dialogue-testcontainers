@@ -1,12 +1,15 @@
 package com.prodyna.dialogue.testcontainers.presentation;
 
+import com.prodyna.dialogue.testcontainers.AbstractDependencies;
 import com.prodyna.dialogue.testcontainers.business.NoteService;
 import com.prodyna.dialogue.testcontainers.configuration.MapperConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -16,22 +19,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
 
-@MockBean(NoteService.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
-@WebMvcTest(NotesController.class)
-@Import(MapperConfiguration.class)
-public class NotesControllerTest {
+public class NotesControllerTest extends AbstractDependencies {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private NoteService noteService;
-
     @Test
     public void getAllNotes() throws Exception {
-
-        Mockito.when(noteService.getAllNotes()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/notes")).andExpect(MockMvcResultMatchers.status().isOk());
     }
