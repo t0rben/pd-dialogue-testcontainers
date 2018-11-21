@@ -1,6 +1,5 @@
 package com.prodyna.dialogue.testcontainers.business;
 
-import com.prodyna.dialogue.testcontainers.AbstractDependencies;
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
 import com.prodyna.dialogue.testcontainers.persistence.repository.NoteRepository;
 import org.junit.Assert;
@@ -19,7 +18,7 @@ import java.util.Optional;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @MockBean(classes = NoteRepository.class)
-public class NoteServiceTest extends AbstractDependencies {
+public class NoteServiceMockTest {
 
     @Autowired
     private NoteService noteService;
@@ -38,6 +37,16 @@ public class NoteServiceTest extends AbstractDependencies {
 
     @Test
     public void getNote() {
+        Note note = new Note();
+        note.setId("id");
+        Mockito.when(noteRepository.findById("id")).thenReturn(Optional.of(note));
+        Optional<Note> optionalNote = noteService.getNote("id");
+        Mockito.verify(noteRepository).findById("id");
+        Assert.assertTrue(optionalNote.isPresent());
+    }
+
+    @Test
+    public void getNoteCacheTest() {
 
         Note note = new Note();
         note.setId("id");
