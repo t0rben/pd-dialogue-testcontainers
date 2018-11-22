@@ -14,11 +14,8 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
@@ -47,6 +44,7 @@ public class NoteServiceMockTest {
 
     @Test
     public void getNote() {
+
         Note note = new Note();
         note.setId("id");
         Mockito.when(noteRepository.findById("id")).thenReturn(Optional.of(note));
@@ -122,8 +120,7 @@ public class NoteServiceMockTest {
     }
 
     @Test
-    public void  getStatistics() {
-
+    public void getStatistics() {
 
     }
 }

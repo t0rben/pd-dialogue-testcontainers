@@ -31,10 +31,12 @@ public class NoteServiceContainerTest {
             .withExposedPorts(27017);
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
         String mongoUri = "mongodb://" + mongo.getContainerIpAddress() + ":" + mongo.getMappedPort(27017);
 
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
             TestPropertyValues.of("spring.data.mongodb.uri:" + mongoUri)
                     .applyTo(configurableApplicationContext.getEnvironment());
         }
@@ -48,6 +50,7 @@ public class NoteServiceContainerTest {
 
     @Before
     public void setUp() {
+
         Note note = new Note();
         note.setContent("Denk an die Milch");
         noteService.createNote(note);
@@ -55,11 +58,13 @@ public class NoteServiceContainerTest {
 
     @After
     public void tearDown() {
+
         mongoTemplate.remove(new Query(), "note");
     }
 
     @Test
     public void getAllNotes() {
+
         List<Note> notes = noteService.getAllNotes();
         Assert.assertNotNull(notes);
         Assert.assertEquals(1, notes.size());
