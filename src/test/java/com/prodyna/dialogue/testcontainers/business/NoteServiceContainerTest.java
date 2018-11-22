@@ -1,25 +1,44 @@
 package com.prodyna.dialogue.testcontainers.business;
 
-import com.prodyna.dialogue.testcontainers.AbstractDependencies;
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
 import com.prodyna.dialogue.testcontainers.presentation.NoteStatisticsDTO;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class NoteServiceContainerTest extends AbstractDependencies {
+@ContextConfiguration(initializers = NoteServiceContainerTest.Initializer.class)
+public class NoteServiceContainerTest {
 
-    // Für den Dialog würde ich die Container-Initialisierung in der gleichen Klasse machen.
-    // Sonst wird es während dem Vortrag schnell unübersichtlich
+    @ClassRule
+    public static GenericContainer mongo = new GenericContainer("mongo:3.6.9")
+            .withCommand("mongod", "--port", "27017")
+            .withExposedPorts(27017);
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        String mongoUri = "mongodb://" + mongo.getContainerIpAddress() + ":" + mongo.getMappedPort(27017);
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of("spring.data.mongodb.uri:" + mongoUri)
+                    .applyTo(configurableApplicationContext.getEnvironment());
+        }
+    }
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private NoteService noteService;
@@ -27,13 +46,13 @@ public class NoteServiceContainerTest extends AbstractDependencies {
     @Before
     public void setUp() {
         Note note = new Note();
-        note.setContent("Test");
+        note.setContent("Denk an die Milch");
         noteService.createNote(note);
     }
 
     @After
     public void tearDown() {
-        // cleanups and resets
+        mongoTemplate.remove(new Query(), "note");
     }
 
     @Test
