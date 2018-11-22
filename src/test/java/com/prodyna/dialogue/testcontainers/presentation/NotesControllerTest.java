@@ -1,34 +1,82 @@
 package com.prodyna.dialogue.testcontainers.presentation;
 
 import com.jayway.jsonpath.JsonPath;
-import com.prodyna.dialogue.testcontainers.AbstractDependencies;
+import com.prodyna.dialogue.testcontainers.DockerImages;
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
 @RunWith(SpringRunner.class)
-public class NotesControllerTest extends AbstractDependencies {
+@ContextConfiguration(initializers = NotesControllerTest.Initializer.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+public class NotesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    public static GenericContainer redis = new GenericContainer(DockerImages.REDIS).withExposedPorts(6379);
+
+    public static GenericContainer mongo = new GenericContainer(DockerImages.MONGO).withCommand("mongod", "--port", "27017").withExposedPorts(27017);
+
+    @ClassRule
+    public static TestRule ruleChain = RuleChain.outerRule(redis).around(mongo);
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        String mongoUri = "mongodb://" + mongo.getContainerIpAddress() + ":" + mongo.getMappedPort(27017);
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                    "spring.redis.host:" + redis.getContainerIpAddress(),
+                    "spring.redis.port:" + redis.getMappedPort(6379),
+                    "spring.data.mongodb.uri:" + mongoUri
+            ).applyTo(configurableApplicationContext.getEnvironment());
+        }
+    }
+
     @Before
-    public void setupTest() {
+    public void resetDependencies() {
+
+        mongoTemplate.remove(new Query(), "note");
+
+        for (String cacheName : cacheManager.getCacheNames()) {
+            cacheManager.getCache(cacheName).clear();
+        }
 
         objectMapper = new ObjectMapper();
     }

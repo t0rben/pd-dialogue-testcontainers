@@ -39,9 +39,6 @@ public class NoteServiceMockTest {
     @Autowired
     private CacheManager cacheManager;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
     @Before
     public void reset() {
 

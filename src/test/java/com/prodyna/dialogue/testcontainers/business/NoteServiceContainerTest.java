@@ -1,5 +1,6 @@
 package com.prodyna.dialogue.testcontainers.business;
 
+import com.prodyna.dialogue.testcontainers.DockerImages;
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
 import com.prodyna.dialogue.testcontainers.presentation.NoteStatisticsDTO;
 import org.junit.*;
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
@@ -20,10 +22,11 @@ import java.util.List;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = NoteServiceContainerTest.Initializer.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class NoteServiceContainerTest {
 
     @ClassRule
-    public static GenericContainer mongo = new GenericContainer("mongo:3.6.9")
+    public static GenericContainer mongo = new GenericContainer(DockerImages.MONGO)
             .withCommand("mongod", "--port", "27017")
             .withExposedPorts(27017);
 
