@@ -85,6 +85,7 @@ public class NotesController {
 
     @GetMapping(path = ROOTPATH + "/statistics")
     public ResponseEntity<NoteStatisticsDTO> getStats() {
+
         return ResponseEntity.ok(noteService.getNoteStatistics());
     }
 

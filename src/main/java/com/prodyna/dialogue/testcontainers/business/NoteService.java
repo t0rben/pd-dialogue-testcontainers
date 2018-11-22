@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,8 +62,7 @@ public class NoteService {
 
         NoteStatisticsDTO noteStatisticsDTO = new NoteStatisticsDTO();
         noteStatisticsDTO.setCount(aggregate.getUniqueMappedResult().getCount());
-        return  noteStatisticsDTO;
+        return noteStatisticsDTO;
     }
-
 
 }

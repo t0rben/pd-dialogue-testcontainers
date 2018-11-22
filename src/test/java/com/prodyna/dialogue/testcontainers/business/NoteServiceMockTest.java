@@ -2,6 +2,8 @@ package com.prodyna.dialogue.testcontainers.business;
 
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
 import com.prodyna.dialogue.testcontainers.persistence.repository.NoteRepository;
+import com.prodyna.dialogue.testcontainers.presentation.NoteStatisticsDTO;
+import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,9 +17,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @SpringBootTest
@@ -35,6 +40,9 @@ public class NoteServiceMockTest {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Before
     public void reset() {
@@ -120,7 +128,18 @@ public class NoteServiceMockTest {
     }
 
     @Test
-    public void getStatistics() {
+    public void getNoteStatistics() {
+
+        CountOutput countOutput = new CountOutput();
+        countOutput.setCount(2L);
+
+        final AggregationResults<CountOutput> count = new AggregationResults<>(Collections.singletonList(countOutput), new Document("count", 0L));
+
+        Mockito.when(mongoTemplate.aggregate(Mockito.any(TypedAggregation.class), Mockito.<Class>any())).thenReturn(count);
+
+        final NoteStatisticsDTO noteStatistics = noteService.getNoteStatistics();
+
+        Assert.assertEquals(new Long(2L), noteStatistics.getCount());
 
     }
 }
