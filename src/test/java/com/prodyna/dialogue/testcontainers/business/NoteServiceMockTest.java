@@ -8,16 +8,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@MockBean(classes = NoteRepository.class)
+@MockBean(classes = {NoteRepository.class, MongoTemplate.class})
+@EnableAutoConfiguration(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@ActiveProfiles("test")
 public class NoteServiceMockTest {
 
     @Autowired
@@ -28,6 +37,9 @@ public class NoteServiceMockTest {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Before
     public void reset() {
@@ -108,6 +120,12 @@ public class NoteServiceMockTest {
         noteService.getAllNotes();
 
         Mockito.verify(noteRepository).findAll();
+
+    }
+
+    @Test
+    public void  getStatistics() {
+
 
     }
 }

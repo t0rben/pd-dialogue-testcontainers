@@ -2,6 +2,7 @@ package com.prodyna.dialogue.testcontainers.business;
 
 import com.prodyna.dialogue.testcontainers.AbstractDependencies;
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
+import com.prodyna.dialogue.testcontainers.presentation.NoteStatisticsDTO;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,5 +41,13 @@ public class NoteServiceContainerTest extends AbstractDependencies {
         List<Note> notes = noteService.getAllNotes();
         Assert.assertNotNull(notes);
         Assert.assertEquals(1, notes.size());
+    }
+
+    @Test
+    public void testNoteStatistics() {
+
+        final NoteStatisticsDTO noteStatistics = noteService.getNoteStatistics();
+
+        Assert.assertEquals(new Long(1), noteStatistics.getCount());
     }
 }

@@ -1,6 +1,5 @@
 package com.prodyna.dialogue.testcontainers;
 
-import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.rules.RuleChain;
@@ -11,6 +10,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
@@ -50,9 +50,9 @@ public class AbstractDependencies {
     @Before
     public void resetDependencies() {
 
-        mongoTemplate.remove(Note.class);
+        mongoTemplate.remove(new Query(), "note");
 
-        for(String cacheName : cacheManager.getCacheNames()) {
+        for (String cacheName : cacheManager.getCacheNames()) {
             cacheManager.getCache(cacheName).clear();
         }
     }
