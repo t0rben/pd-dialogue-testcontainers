@@ -51,7 +51,7 @@ public class NoteRepositoryTest {
     }
 
     @Test
-    public void test() {
+    public void writingTest() {
 
         for (int i = 0; i < 1000; i++) {
             Note note = new Note();

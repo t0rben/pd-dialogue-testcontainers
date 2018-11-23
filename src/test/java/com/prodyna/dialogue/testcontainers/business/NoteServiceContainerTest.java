@@ -2,22 +2,24 @@ package com.prodyna.dialogue.testcontainers.business;
 
 import com.prodyna.dialogue.testcontainers.DockerImages;
 import com.prodyna.dialogue.testcontainers.persistence.entity.Note;
-import com.prodyna.dialogue.testcontainers.presentation.NoteStatisticsDTO;
-import org.junit.*;
+import com.prodyna.dialogue.testcontainers.persistence.repository.NoteRepository;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -43,38 +45,99 @@ public class NoteServiceContainerTest {
     }
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private NoteRepository noteRepository;
 
     @Autowired
     private NoteService noteService;
 
-    @Before
-    public void setUp() {
+    @Autowired
+    private CacheManager cacheManager;
 
-        Note note = new Note();
-        note.setContent("Denk an die Milch");
-        noteService.createNote(note);
+    @Before
+    public void resetDependencies() {
+
+        noteRepository.deleteAll();
+        cacheManager.getCache("notes").clear();
+
     }
 
-    @After
-    public void tearDown() {
+    private Note addRandnomNote() {
 
-        mongoTemplate.remove(new Query(), "note");
+        Note note = new Note();
+        note.setContent(UUID.randomUUID().toString());
+
+        return noteRepository.save(note);
+    }
+
+    @Test
+    public void getNote() {
+
+        final Note note = addRandnomNote();
+
+        Assert.assertEquals(note.getContent(), noteService.getNote(note.getId()).get().getContent());
+
+        Assert.assertEquals(note.getContent(), ((Note) cacheManager.getCache("notes").get(note.getId()).get()).getContent());
+    }
+
+    @Test
+    public void createNote() {
+
+        Note note = new Note();
+        note.setContent(UUID.randomUUID().toString());
+
+        final Note savedNote = noteService.createNote(note);
+
+        Assert.assertNotNull(savedNote.getId());
+
+        Assert.assertEquals(note.getContent(), ((Note) cacheManager.getCache("notes").get(savedNote.getId()).get()).getContent());
+
+    }
+
+    @Test
+    public void updateNote() {
+
+        final Note note = addRandnomNote();
+
+        note.setContent("blabla");
+        final Note updatedNote = noteService.updateNote(note);
+
+        Assert.assertNotNull(updatedNote.getId());
+        Assert.assertEquals("blabla", updatedNote.getContent());
+
+        Assert.assertEquals(note.getContent(), ((Note) cacheManager.getCache("notes").get(updatedNote.getId()).get()).getContent());
+
+    }
+
+    @Test
+    public void deleteNote() {
+
+        final Note note = addRandnomNote();
+
+        noteService.deleteNote(note.getId());
+
+        Assert.assertEquals(0L, noteRepository.count());
+        Assert.assertNull(cacheManager.getCache("notes").get(note.getId()));
     }
 
     @Test
     public void getAllNotes() {
 
-        List<Note> notes = noteService.getAllNotes();
-        Assert.assertNotNull(notes);
-        Assert.assertEquals(1, notes.size());
+        addRandnomNote();
+        addRandnomNote();
+        addRandnomNote();
+
+        Assert.assertEquals(3, noteService.getAllNotes().size());
+
     }
 
     @Test
-    public void testNoteStatistics() {
+    public void getNoteStatistics() {
 
-        final NoteStatisticsDTO noteStatistics = noteService.getNoteStatistics();
+        addRandnomNote();
+        addRandnomNote();
+        addRandnomNote();
 
-        Assert.assertEquals(new Long(1), noteStatistics.getCount());
+        Assert.assertEquals(new Long(3), noteService.getNoteStatistics().getCount());
+
     }
 }
