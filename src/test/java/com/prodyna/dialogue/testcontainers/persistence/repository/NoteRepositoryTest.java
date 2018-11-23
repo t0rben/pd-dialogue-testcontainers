@@ -26,7 +26,7 @@ import java.util.UUID;
 public class NoteRepositoryTest {
 
     @ClassRule
-    public static GenericContainer mongo = new GenericContainer(DockerImages.MONGO).withCommand("mongod", "--port", "27017").withExposedPorts(27017);
+    public static GenericContainer mongo = new GenericContainer(DockerImages.MONGO).withEnv("IRYNA", "Feuerstein").withCommand("mongod", "--port", "27017").withExposedPorts(27017);
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
